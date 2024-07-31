@@ -7,6 +7,8 @@ import json
 from datetime import datetime
 import pytz
 from collections import deque
+import pprint
+import sys
 
 read_command_header = bytearray([0x50, 0x03])
 write_command_header = bytearray([0x50, 0x06])
@@ -120,16 +122,16 @@ def hwt9053_data():
         upload_data["time"] = current_time_gmt_json
 
         socket_data = json.dumps(upload_data).encode()
-        # print(upload_data)
+        pprint.pprint(upload_data)
         client_socket.sendall(socket_data)
-        time.sleep(1)
+        time.sleep(5)
 
 
 ser = serial.Serial(com_port, 9600, timeout=0.5)  # 打开COM6，将波特率配置为9600，其余参数使用默认值
 if ser.isOpen():  # 判断串口是否成功打开
     print("打开串口成功。")
     print(ser.name)  # 输出串口号
-    server_address = '192.168.50.76'
+    server_address = '192.168.1.112'
     server_port = 8888
     # 創建一個timezone對象
     gmt = pytz.timezone('GMT')
@@ -141,6 +143,8 @@ if ser.isOpen():  # 判断串口是否成功打开
     except ConnectionRefusedError:
         print("錯誤：連線被拒絕。請確認伺服器是否正在運行。")
         client_socket.close()
+        time.sleep(10)
+        sys.exit()
 
     data_get = threading.Thread(target=hwt9053_data())
     data_get.start()
